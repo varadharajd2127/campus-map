@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <link rel="stylesheet" href="style1.css">
+  <meta charset="UTF-8">
+  <title>ID Card Generator</title>
+
+  <!-- Tamil Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- html2pdf -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+<div class="id-card" id="card">
+
+  <div class="header">
+    <h1>ஜேம்ஸ் டி ரோசி இளைஞர் இயக்கம்</h1>
+    <p>ஒன்றுபடுவோம் செயல்படுவோம் உயர்வோம்!</p>
+  </div>
+
+  <div class="body">
+
+    <!-- LEFT -->
+    <div class="left">
+      <!-- 🔥 Added crossorigin -->
+      <img id="photoPreview" class="photo" crossorigin="anonymous">
+      <img id="qrPreview" class="qr">
+      <p class="phone">📞 <span id="phoneDisplay"></span></p>
+    </div>
+
+    <!-- CENTER -->
+    <div class="center">
+      <div class="title">உறுப்பினர் அட்டை</div>
+
+      <p><span>பெயர் :</span> <span id="name"></span></p>
+      <p><span>வயது :</span> <span id="age"></span></p>
+      <p><span>இரத்த வகை :</span> <span id="blood"></span></p>
+      <p><span>கைபேசி எண் :</span> <span id="mobile"></span></p>
+
+      <p><span>கிராமம் :</span> சருகணி</p>
+      <p><span>மாவட்டம் :</span> சிவகங்கை</p>
+      <p><span>மாநிலம் :</span> தமிழ்நாடு</p>
+
+      <div class="signature">
+        சருகணி பங்குத்தந்தை <br>
+        இயக்க ஒருங்கிணைப்பாளர்
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+      <img src="images/saint.jpeg" class="saint">
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-top">
+      <div class="social-icons">
+        <i class="fab fa-instagram"></i>
+        <i class="fab fa-facebook"></i>
+        <i class="fab fa-x-twitter"></i>
+      </div>
+      <p>james_drosy_youth_movement</p>
+    </div>
+
+    <p>சருகணி, தேவகோட்டை வட்டம், சிவகங்கை மாவட்டம்</p>
+  </div>
+
+</div>
+
+<button class="btn" onclick="downloadPDF()">Download ID Card (PDF)</button>
+
+<script>
+window.onload = async function() {
+
+  try {
+    const memberId = localStorage.getItem("memberId");
+
+    console.log("Member ID:", memberId);
+
+    if (!memberId) {
+      alert("No member ID found");
+      return;
+    }
+
+    const res = await fetch(`http://localhost:3000/member/${memberId}`);
+    const data = await res.json();
+
+    console.log("Fetched Data:", data);
+
+    if (!data) {
+      alert("No data found in database");
+      return;
+    }
+
+    // Fill values
+    document.getElementById("name").innerText = data.name || "";
+    document.getElementById("age").innerText = data.age || "";
+    document.getElementById("blood").innerText = data.blood || "";
+    document.getElementById("mobile").innerText = data.mobile || "";
+
+    document.getElementById("phoneDisplay").innerText = data.mobile || "";
+
+    // 🔥 IMPORTANT: ensure image loads before PDF
+    const img = document.getElementById("photoPreview");
+    img.src = data.photo_url || "";
+
+    // QR
+    const qr = localStorage.getItem("qr");
+    if (qr) {
+      document.getElementById("qrPreview").src = qr;
+    }
+
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Error loading data");
+  }
+};
+
+// 🔥 FIXED PDF FUNCTION
+function downloadPDF() {
+  const element = document.getElementById("card");
+
+  const opt = {
+    margin: 0,
+    filename: 'ID_Card.pdf',
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { 
+      scale: 2,
+      useCORS: true   // 🔥 KEY FIX
+    },
+    jsPDF: { unit: 'px', format: [1025, 700], orientation: 'landscape' }
+  };
+
+  html2pdf().set(opt).from(element).save();
+}
+</script>
+
+</body>
+</html>

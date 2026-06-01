@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Member Details</title>
+</head>
+
+<body>
+
+<h2>Member Details</h2>
+
+<p><b>Name:</b> <span id="name"></span></p>
+<p><b>Age:</b> <span id="age"></span></p>
+<p><b>Blood:</b> <span id="blood"></span></p>
+<p><b>Mobile:</b> <span id="mobile"></span></p>
+
+<img id="photo" width="150">
+
+<script>
+
+async function loadData() {
+  try {
+    // 🔥 Get ID from URL
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    console.log("ID from URL:", id);
+
+    if (!id) {
+      alert("No ID found in URL");
+      return;
+    }
+
+    // 🔥 Fetch from backend
+    const res = await fetch(`http://localhost:3000/member/${id}`);
+    const data = await res.json();
+
+    console.log("Fetched Data:", data);
+
+    if (!data) {
+      alert("No data found");
+      return;
+    }
+
+    // 🔥 Fill data
+    document.getElementById("name").innerText = data.name || "";
+    document.getElementById("age").innerText = data.age || "";
+    document.getElementById("blood").innerText = data.blood || "";
+    document.getElementById("mobile").innerText = data.mobile || "";
+
+    document.getElementById("photo").src = data.photo_url || "";
+
+  } catch (err) {
+    console.error(err);
+    alert("Error loading data");
+  }
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>

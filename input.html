@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Member Registration</title>
+
+  <link rel="stylesheet" href="styleIN.css">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Member Registration</h2>
+
+  <form id="form">
+
+    <div class="input-group">
+      <i class="fa fa-user"></i>
+      <input type="text" id="inputName" placeholder="Full Name" required>
+    </div>
+
+    <div class="input-group">
+      <i class="fa fa-calendar"></i>
+      <input type="number" id="inputAge" placeholder="Age" required>
+    </div>
+
+    <div class="input-group">
+      <i class="fa fa-tint"></i>
+      <input type="text" id="inputBlood" placeholder="Blood Group (e.g. O+)" required>
+    </div>
+
+    <div class="input-group">
+      <i class="fa fa-phone"></i>
+      <input type="text" id="inputMobile" placeholder="Mobile Number" required>
+    </div>
+
+    <div class="file-upload">
+      <label><b>Upload Photo</b></label>
+      <input type="file" id="inputPhoto" accept="image/*" required>
+    </div>
+
+    <div class="preview">
+      <img id="photoPreview" src="" alt="Preview" style="display:none;">
+    </div>
+
+    <button type="submit">Generate ID</button>
+
+  </form>
+</div>
+
+<script>
+
+// 🔹 Image Preview
+document.getElementById("inputPhoto").addEventListener("change", function() {
+  const file = this.files[0];
+  const preview = document.getElementById("photoPreview");
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// 🔥 SUBMIT TO BACKEND (FIXED)
+document.getElementById("form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("name", document.getElementById("inputName").value);
+  formData.append("age", document.getElementById("inputAge").value);
+  formData.append("blood", document.getElementById("inputBlood").value);
+  formData.append("mobile", document.getElementById("inputMobile").value);
+  formData.append("photo", document.getElementById("inputPhoto").files[0]);
+
+  try {
+    const res = await fetch("http://localhost:3000/add-member", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    console.log("Backend Response:", data); // DEBUG
+
+    // ✅ STORE MEMBER ID
+    localStorage.setItem("memberId", data.id);
+
+    // ✅ STORE QR (for later use)
+    localStorage.setItem("qr", data.qr);
+
+    // ✅ REDIRECT
+    window.location.href = "ID.html";
+
+  } catch (err) {
+    console.error(err);
+    alert("Error submitting form");
+  }
+});
+
+</script>
+
+</body>
+</html>
